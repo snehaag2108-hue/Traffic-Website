@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic & Parking Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="app-body">
+
+    <nav id="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><i class="fas fa-car-side"></i></div>
+            <div class="brand-text">
+                <span class="brand-name">TPMS</span>
+                <span class="brand-ver">v3.0 NEXUS</span>
+            </div>
+        </div>
+        <div class="nav-section-label">CORE</div>
+        <div class="nav-links">
+            <div class="nav-link active" onclick="showPage('dashboard', this)"><i class="fas fa-th-large"></i> <span>Dashboard</span></div>
+            <div class="nav-link" onclick="showPage('traffic', this)"><i class="fas fa-traffic-light"></i> <span>Traffic Monitor</span></div>
+            <div class="nav-link" onclick="showPage('parking', this)"><i class="fas fa-parking"></i> <span>Parking Zones</span></div>
+            <div class="nav-link" onclick="showPage('payment', this)"><i class="fas fa-qrcode"></i> <span>Payment Scanner</span></div>
+        </div>
+        <div class="nav-section-label">ANALYTICS</div>
+        <div class="nav-links">
+            <div class="nav-link" onclick="showPage('incidents', this)"><i class="fas fa-exclamation-triangle"></i> <span>Incident Manager</span></div>
+            <div class="nav-link" onclick="showPage('heatmap', this)"><i class="fas fa-fire"></i> <span>Traffic Heatmap</span></div>
+            <div class="nav-link" onclick="showPage('reports', this)"><i class="fas fa-chart-bar"></i> <span>Reports & Export</span></div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <span class="pulse-dot"></span> All Systems Online
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <header class="main-header">
+            <div class="header-left">
+                <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+                <h1 id="dynamic-title">Dashboard</h1>
+                <div class="breadcrumb"><span>TPMS</span> / <span id="breadcrumb-sub">Overview</span></div>
+            </div>
+            <div class="header-right">
+                <div class="header-time" id="headerClock"></div>
+                <div class="notif-btn" onclick="toggleNotifs()">
+                    <i class="fas fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge">3</span>
+                </div>
+                <div id="notifPanel" class="notif-panel">
+                    <div class="notif-header">Notifications</div>
+                    <div class="notif-item danger"><i class="fas fa-exclamation-circle"></i> Zone B: 95% capacity reached</div>
+                    <div class="notif-item warn"><i class="fas fa-car"></i> Speeding detected – Sector 4</div>
+                    <div class="notif-item info"><i class="fas fa-info-circle"></i> Payment gateway online</div>
+                </div>
+                <div class="admin-panel">
+                    <div class="admin-info">
+                        <span class="admin-name">Admin User</span>
+                        <span class="admin-role">Super Admin</span>
+                    </div>
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=00d4ff&color=000" alt="Profile" class="admin-avatar">
+                    <button class="logout-btn" onclick="handleLogout()" title="Logout"><i class="fas fa-power-off"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page-section active">
+            <div class="kpi-strip">
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#00d4ff22; color:#00d4ff;"><i class="fas fa-car"></i></div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-vehicles">1,248</div>
+                        <div class="kpi-label">Vehicles Today</div>
+                        <div class="kpi-delta up"><i class="fas fa-arrow-up"></i> 12% vs yesterday</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#10b98122; color:#10b981;"><i class="fas fa-parking"></i></div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-slots">18/24</div>
+                        <div class="kpi-label">Slots Occupied</div>
+                        <div class="kpi-delta down"><i class="fas fa-arrow-down"></i> 2 freed recently</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#ef444422; color:#ef4444;"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-violations">7</div>
+                        <div class="kpi-label">Violations Today</div>
+                        <div class="kpi-delta up"><i class="fas fa-arrow-up"></i> 3 unresolved</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon" style="background:#f59e0b22; color:#f59e0b;"><i class="fas fa-rupee-sign"></i></div>
+                    <div class="kpi-body">
+                        <div class="kpi-value" id="kpi-revenue">₹8,420</div>
+                        <div class="kpi-label">Revenue Today</div>
+                        <div class="kpi-delta up"><i class="fas fa-arrow-up"></i> 18% this week</div>
+                    </div>
+                </div>
+            </div>
+            <!-- LIVE NAVIGATION SECTION — full width across dash-grid -->
+            <div class="card live-nav-card">
+                <div class="live-nav-header">
+                    <div class="live-nav-title">
+                        <h3><i class="fas fa-map-marked-alt"></i> Live Navigation &amp; Traffic Monitor</h3>
+                        <span id="gpsStatusBadge" class="gps-badge offline"><i class="fas fa-satellite-dish"></i> GPS Offline</span>
+                    </div>
+                    <div class="live-nav-controls">
+                        <button class="btn-primary" id="locateBtn" onclick="requestLiveLocation()">
+                            <i class="fas fa-crosshairs"></i> Detect My Location
+                        </button>
+                        <button class="btn-secondary" id="watchBtn" onclick="toggleLiveWatch()" style="display:none;">
+                            <i class="fas fa-eye"></i> Watch Live
+                        </button>
+                        <button class="btn-secondary" id="stopWatchBtn" onclick="stopLiveWatch()" style="display:none;">
+                            <i class="fas fa-stop"></i> Stop Watch
+                        </button>
+                    </div>
+                </div>
+
+                <!-- LOCATION INFO BAR -->
+                <div id="locationInfoBar" class="location-info-bar" style="display:none;">
+                    <div class="loc-info-item">
+                        <i class="fas fa-map-pin" style="color:var(--accent);"></i>
+                        <div>
+                            <div class="loc-info-label">Latitude</div>
+                            <div class="loc-info-val" id="latVal">—</div>
+                        </div>
+                    </div>
+                    <div class="loc-info-item">
+                        <i class="fas fa-map-pin" style="color:var(--accent2);"></i>
+                        <div>
+                            <div class="loc-info-label">Longitude</div>
+                            <div class="loc-info-val" id="lngVal">—</div>
+                        </div>
+                    </div>
+                    <div class="loc-info-item">
+                        <i class="fas fa-tachometer-alt" style="color:var(--warn);"></i>
+                        <div>
+                            <div class="loc-info-label">Accuracy</div>
+                            <div class="loc-info-val" id="accuracyVal">—</div>
+                        </div>
+                    </div>
+                    <div class="loc-info-item">
+                        <i class="fas fa-clock" style="color:var(--success);"></i>
+                        <div>
+                            <div class="loc-info-label">Last Updated</div>
+                            <div class="loc-info-val" id="locTimeVal">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN BODY: MAP + SIDE PANEL -->
+                <div class="live-nav-body">
+
+                    <!-- GOOGLE MAP EMBED -->
+                    <div class="map-container">
+                        <div id="mapIdle" class="map-idle-overlay">
+                            <i class="fas fa-map fa-3x" style="color:var(--accent); opacity:0.4;"></i>
+                            <p>Allow GPS access to show your live location on the map</p>
+                            <button class="btn-primary" onclick="requestLiveLocation()"><i class="fas fa-crosshairs"></i> Enable GPS</button>
+                        </div>
+                        <!-- Google Maps iframe — src injected by JS after GPS acquired -->
+                        <iframe id="googleMapFrame"
+                            style="display:none; width:100%; height:100%; border:none; border-radius:10px;"
+                            allowfullscreen
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <!-- Live position marker overlay on top of map -->
+                        <div id="liveMarkerPulse" class="live-marker-pulse" style="display:none;">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-dot-center"></div>
+                        </div>
+                    </div>
+
+                    <!-- SIDE PANEL -->
+                    <div class="nav-side-panel">
+
+                        <!-- SIMULATED TRAFFIC FLOW COUNTS -->
+                        <div class="nav-panel-section">
+                            <div class="nav-panel-label">
+                                <i class="fas fa-car-side"></i> Live Traffic Flow
+                                <span id="trafficSimBadge" class="sim-badge" style="display:none;"><span class="sim-dot"></span> SIMULATING</span>
+                            </div>
+                            <div id="trafficFlowIdle" class="tf-idle-msg"><i class="fas fa-map-marker-alt" style="opacity:0.4;"></i> Detect location first</div>
+                            <div id="trafficFlowData" style="display:none;">
+                                <!-- Vehicle count cards -->
+                                <div class="traffic-flow-grid">
+                                    <div class="tf-card tf-car"><i class="fas fa-car tf-vicon"></i><span id="tf-cars">—</span><small>Cars</small></div>
+                                    <div class="tf-card tf-bike"><i class="fas fa-motorcycle tf-vicon"></i><span id="tf-bikes">—</span><small>Bikes</small></div>
+                                    <div class="tf-card tf-truck"><i class="fas fa-truck tf-vicon"></i><span id="tf-trucks">—</span><small>Trucks</small></div>
+                                    <div class="tf-card tf-total"><i class="fas fa-hashtag tf-vicon"></i><span id="tf-total">—</span><small>Total</small></div>
+                                </div>
+
+                                <!-- Congestion level -->
+                                <div id="tf-congestion" class="tf-congestion-bar"></div>
+
+                                <!-- Speed gauge -->
+                                <div class="tf-speed-row">
+                                    <div class="tf-speed-label"><i class="fas fa-tachometer-alt"></i> Avg Speed</div>
+                                    <div class="tf-speed-val"><span id="tf-speed">—</span> <small>km/h</small></div>
+                                </div>
+                                <div class="tf-speed-track">
+                                    <div class="tf-speed-fill" id="tf-speed-fill"></div>
+                                </div>
+
+                                <!-- Vehicle flow bars -->
+                                <div class="tf-flow-bars">
+                                    <div class="tf-flow-row">
+                                        <span class="tf-flow-label" style="color:#00d4ff;">Cars</span>
+                                        <div class="tf-flow-track"><div class="tf-flow-bar bar-car" id="tf-bar-cars"></div></div>
+                                        <span class="tf-flow-pct" id="tf-pct-cars">0%</span>
+                                    </div>
+                                    <div class="tf-flow-row">
+                                        <span class="tf-flow-label" style="color:#f59e0b;">Bikes</span>
+                                        <div class="tf-flow-track"><div class="tf-flow-bar bar-bike" id="tf-bar-bikes"></div></div>
+                                        <span class="tf-flow-pct" id="tf-pct-bikes">0%</span>
+                                    </div>
+                                    <div class="tf-flow-row">
+                                        <span class="tf-flow-label" style="color:#ef4444;">Trucks</span>
+                                        <div class="tf-flow-track"><div class="tf-flow-bar bar-truck" id="tf-bar-trucks"></div></div>
+                                        <span class="tf-flow-pct" id="tf-pct-trucks">0%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Mini live chart canvas -->
+                                <div class="tf-chart-wrap">
+                                    <div class="tf-chart-label"><i class="fas fa-chart-line"></i> Live Vehicle Count (last 10 readings)</div>
+                                    <canvas id="tfLiveChart" height="55"></canvas>
+                                </div>
+
+                                <!-- Last update ticker -->
+                                <div class="tf-update-row">
+                                    <span id="tf-last-update" class="tf-update-text">Updating...</span>
+                                    <button class="tf-refresh-btn" onclick="refreshTrafficFlow()"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DESTINATION INPUT -->
+                        <div class="nav-panel-section">
+                            <div class="nav-panel-label"><i class="fas fa-search-location"></i> Set Destination</div>
+                            <div class="dest-input-row">
+                                <input type="text" id="destinationInput" class="form-input" placeholder="Enter destination address...">
+                            </div>
+                            <div style="display:flex; gap:8px; margin-top:8px;">
+                                <button class="btn-primary" style="flex:1;" onclick="findRoutes()"><i class="fas fa-route"></i> Find Routes</button>
+                                <button class="btn-secondary" onclick="clearRoutes()" title="Clear"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- SUGGESTED ROUTES -->
+                        <div class="nav-panel-section">
+                            <div class="nav-panel-label"><i class="fas fa-directions"></i> Suggested Routes</div>
+                            <div id="routeListIdle" class="tf-idle-msg">Enter destination above</div>
+                            <div id="routeList" style="display:none;"></div>
+                        </div>
+
+                        <!-- OPEN IN GOOGLE MAPS BUTTON -->
+                        <div id="openMapsSection" style="display:none;">
+                            <a id="openGoogleMapsBtn" href="#" target="_blank" class="btn-maps-open">
+                                <i class="fab fa-google"></i> Open in Google Maps
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="locationStatus" style="font-size:0.8rem; color:var(--text-dim); margin-top:8px; text-align:center;"></div>
+            </div>
+
+            <div class="dash-grid-bottom">
+                <div class="card weather-card">
+                    <h3><i class="fas fa-cloud-sun"></i> Environmental Conditions</h3>
+                    <div class="weather-body">
+                        <div class="weather-main">
+                            <i class="fas fa-sun weather-icon"></i>
+                            <div>
+                                <div class="weather-temp">32°C</div>
+                                <div class="weather-desc">Clear Sky – Low Fog Risk</div>
+                            </div>
+                        </div>
+                        <div class="weather-stats">
+                            <div><i class="fas fa-tint"></i> Humidity: 68%</div>
+                            <div><i class="fas fa-wind"></i> Wind: 14 km/h</div>
+                            <div><i class="fas fa-eye"></i> Visibility: Good</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="qa-btn" onclick="showPage('payment', document.querySelectorAll('.nav-link')[3])"><i class="fas fa-qrcode"></i> Scan Payment</button>
+                        <button class="qa-btn" onclick="addIncident()"><i class="fas fa-flag"></i> Log Incident</button>
+                        <button class="qa-btn" onclick="showPage('parking', document.querySelectorAll('.nav-link')[2])"><i class="fas fa-parking"></i> Check Parking</button>
+                        <button class="qa-btn danger" onclick="triggerAlert()"><i class="fas fa-siren"></i> Emergency Alert</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRAFFIC MONITORING -->
+        <section id="traffic" class="page-section">
+
+            <!-- VIDEO UPLOAD (moved from dashboard) -->
+            <div class="traffic-top-row">
+                <div class="card traffic-video-card">
+                    <h3><i class="fas fa-video"></i> Video Input Feed</h3>
+                    <div class="input-grid">
+                        <label class="btn-action upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Video
+                            <input type="file" id="videoInput" accept="video/*" hidden>
+                        </label>
+                        <div class="url-bar">
+                            <i class="fas fa-link"></i>
+                            <input type="text" placeholder="rtsp://192.168.1.10:554/stream" id="rtspInput">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="startDetection()"><i class="fas fa-play"></i> Start Detection</button>
+                    <p class="status-indicator">Status: <span id="detectionStatus">Idle</span></p>
+                    <div class="video-window" style="margin-top:10px;">
+                        <video id="videoPreview" controls style="display:none; width:100%;"></video>
+                        <div id="videoPlaceholder" class="placeholder-msg"><i class="fas fa-satellite-dish fa-2x"></i><br>Awaiting Feed...</div>
+                    </div>
+                </div>
+
+                <!-- EMERGENCY VEHICLE PANEL -->
+                <div class="card emergency-panel">
+                    <div class="emergency-panel-header">
+                        <h3><i class="fas fa-ambulance"></i> Emergency Vehicle Monitor</h3>
+                        <span class="live-indicator">● LIVE</span>
+                    </div>
+                    <div class="emv-grid">
+                        <div class="emv-card ambulance">
+                            <div class="emv-icon"><i class="fas fa-ambulance"></i></div>
+                            <div class="emv-count" id="emv-ambulance">0</div>
+                            <div class="emv-label">Ambulance</div>
+                            <div class="emv-priority highest">● HIGHEST</div>
+                        </div>
+                        <div class="emv-card firetruck">
+                            <div class="emv-icon"><i class="fas fa-fire-extinguisher"></i></div>
+                            <div class="emv-count" id="emv-firetruck">0</div>
+                            <div class="emv-label">Fire Truck</div>
+                            <div class="emv-priority high">● HIGH</div>
+                        </div>
+                        <div class="emv-card police">
+                            <div class="emv-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="emv-count" id="emv-police">0</div>
+                            <div class="emv-label">Police Van</div>
+                            <div class="emv-priority medium">● MEDIUM</div>
+                        </div>
+                    </div>
+                    <div class="emv-priority-list">
+                        <div class="emv-priority-title"><i class="fas fa-list-ol"></i> Priority Dispatch Order</div>
+                        <div class="emv-priority-item p1"><span class="p-rank">1</span><i class="fas fa-ambulance"></i> Ambulance <span class="p-tag highest">HIGHEST</span></div>
+                        <div class="emv-priority-item p2"><span class="p-rank">2</span><i class="fas fa-fire-extinguisher"></i> Fire Truck <span class="p-tag high">HIGH</span></div>
+                        <div class="emv-priority-item p3"><span class="p-rank">3</span><i class="fas fa-shield-alt"></i> Police Van <span class="p-tag medium">MEDIUM</span></div>
+                    </div>
+                    <div id="emv-alert-log" class="emv-alert-log"></div>
+                </div>
+            </div>
+
+            <div class="monitor-container">
+                <div class="main-monitor">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-microchip"></i> AI Analysis Feed</h3>
+                            <div style="display:flex;gap:10px;align-items:center;">
+                                <select class="cam-select" id="camSelect">
+                                    <option>CAM-01 – Main Gate</option>
+                                    <option>CAM-02 – Zone B Entry</option>
+                                    <option>CAM-03 – Highway Ramp</option>
+                                    <option>CAM-04 – Parking Lot</option>
+                                </select>
+                                <span class="live-indicator">● LIVE</span>
+                            </div>
+                        </div>
+                        <div class="video-window ai-stream">
+                            <div class="detection-overlay" id="detectionOverlay">
+                                <div class="bounding-box car-box" style="top:30%;left:20%;"><span class="label">SUV | 45 km/h</span></div>
+                                <div class="bounding-box truck-box" style="top:50%;left:55%;"><span class="label">Truck | 32 km/h</span></div>
+                                <div class="bounding-box violation-box" style="top:60%;left:10%;"><span class="label violation-label">⚠ Speeding</span></div>
+                            </div>
+                            <div class="ai-scanline"></div>
+                            <p class="ai-label">Neural Network Processing — YOLOv8 Active</p>
+                        </div>
+                        <div class="traffic-stats-bar">
+                            <div class="ts-item"><span id="tc-cars">24</span><small>Cars</small></div>
+                            <div class="ts-item"><span id="tc-trucks">6</span><small>Trucks</small></div>
+                            <div class="ts-item"><span id="tc-bikes">11</span><small>Bikes</small></div>
+                            <div class="ts-item"><span id="tc-total">41</span><small>Total</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="side-monitor">
+                    <div class="card stat-card">
+                        <h4>Avg Flow Speed</h4>
+                        <div class="speed-gauge"><span id="avgSpeed">42</span> <small>km/h</small></div>
+                        <div class="speed-bar"><div class="fill" id="speedFill"></div></div>
+                        <div class="congestion-indicator" id="congestionLevel">● Moderate Traffic</div>
+                    </div>
+                    <div class="card signal-card">
+                        <h4><i class="fas fa-traffic-light"></i> Signal Control</h4>
+                        <div class="signal-grid">
+                            <div class="signal-zone">
+                                <span>Zone A</span>
+                                <div class="signal-lights">
+                                    <div class="sig red active"></div>
+                                    <div class="sig yellow"></div>
+                                    <div class="sig green"></div>
+                                </div>
+                                <span class="sig-timer" id="timerA">28s</span>
+                            </div>
+                            <div class="signal-zone">
+                                <span>Zone B</span>
+                                <div class="signal-lights">
+                                    <div class="sig red"></div>
+                                    <div class="sig yellow"></div>
+                                    <div class="sig green active"></div>
+                                </div>
+                                <span class="sig-timer" id="timerB">12s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card alert-card">
+                        <h4>Violation Log</h4>
+                        <div id="violationLog" class="violation-log"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARKING ZONES -->
+        <section id="parking" class="page-section">
+            <div class="parking-controls">
+                <div class="zone-tabs">
+                    <button class="zone-tab active" onclick="selectZone('A', this)">Zone A</button>
+                    <button class="zone-tab" onclick="selectZone('B', this)">Zone B</button>
+                    <button class="zone-tab" onclick="selectZone('C', this)">Zone C</button>
+                </div>
+                <div class="parking-legend">
+                    <span class="leg available">■ Available</span>
+                    <span class="leg occupied">■ Occupied</span>
+                    <span class="leg reserved">■ Reserved</span>
+                    <span class="leg ev">■ EV Charging</span>
+                </div>
+            </div>
+            <div class="park-layout">
+                <div class="card parking-main">
+                    <div class="zone-header">
+                        <h3 id="zoneTitle">Zone A – Ground Floor</h3>
+                        <div class="zone-stats">
+                            <span class="occ-badge" id="occBadge">18/24 Occupied</span>
+                        </div>
+                    </div>
+                    <div class="parking-grid" id="parkingGrid"></div>
+                    <div class="park-progress-bar">
+                        <div class="park-fill" id="parkFill" style="width:75%"></div>
+                    </div>
+                    <small id="parkCapLabel">75% capacity — 6 slots available</small>
+                </div>
+                <div class="card parking-sidebar">
+                    <h4><i class="fas fa-info-circle"></i> Slot Details</h4>
+                    <div id="slotDetail" class="slot-detail-panel">
+                        <p style="color:#718096;">Click a slot to view details</p>
+                    </div>
+                    <hr style="border-color:#2d3748;">
+                    <h4><i class="fas fa-clock"></i> Recent Activity</h4>
+                    <div class="activity-feed" id="activityFeed"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAYMENT SCANNER -->
+        <section id="payment" class="page-section">
+            <div class="payment-grid">
+                <div class="card payment-main">
+                    <h3><i class="fas fa-qrcode"></i> Parking Payment Scanner</h3>
+                    <div class="scanner-area" id="scannerArea">
+                        <div class="qr-frame">
+                            <div class="qr-corner tl"></div>
+                            <div class="qr-corner tr"></div>
+                            <div class="qr-corner bl"></div>
+                            <div class="qr-corner br"></div>
+                            <div class="scan-line" id="scanLine"></div>
+                            <div class="qr-placeholder" id="qrPlaceholder">
+                                <i class="fas fa-qrcode fa-3x"></i>
+                                <p>Align QR / Barcode here</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-methods">
+                        <button class="pm-btn active" onclick="selectPayMethod('qr', this)"><i class="fab fa-google-pay"></i> GPay / QR</button>
+                        <button class="pm-btn" onclick="selectPayMethod('upi', this)"><i class="fas fa-mobile-alt"></i> UPI</button>
+                        <button class="pm-btn" onclick="selectPayMethod('card', this)"><i class="fas fa-credit-card"></i> Card / Tap</button>
+                        <button class="pm-btn" onclick="selectPayMethod('cash', this)"><i class="fas fa-rupee-sign"></i> Cash</button>
+                    </div>
+                    <button class="btn-primary scan-btn" onclick="initiateScan()"><i class="fas fa-camera"></i> Start Scan / Process Payment</button>
+                </div>
+                <div class="card payment-right">
+                    <div id="paymentForm" class="payment-form">
+                        <h4>Billing Details</h4>
+                        <div class="form-row">
+                            <label>Vehicle Owner Name</label>
+                            <input class="form-input" type="text" id="ownerName" placeholder="e.g. Rajesh Kumar">
+                        </div>
+                        <div class="form-row">
+                            <label>Vehicle Number</label>
+                            <input class="form-input" type="text" id="vehicleNum" placeholder="MH 12 AB 1234">
+                        </div>
+                        <div class="form-row">
+                            <label>Parking Slot</label>
+                            <input class="form-input" type="text" id="slotNum" placeholder="P-07">
+                        </div>
+                        <div class="form-row">
+                            <label>Entry Time</label>
+                            <input class="form-input" type="text" id="entryTime" placeholder="Auto-detected">
+                        </div>
+                        <div class="form-row">
+                            <label>Duration</label>
+                            <input class="form-input" type="text" id="duration" placeholder="e.g. 2h 30m">
+                        </div>
+                        <div class="bill-summary">
+                            <div class="bill-row"><span>Parking Fee</span><span id="parkFee">₹0</span></div>
+                            <div class="bill-row"><span>GST (18%)</span><span id="gstFee">₹0</span></div>
+                            <div class="bill-row total"><span>Total</span><span id="totalFee">₹0</span></div>
+                        </div>
+                        <button class="btn-primary" onclick="calculateFee()"><i class="fas fa-calculator"></i> Calculate Fee</button>
+                        <button class="btn-success" id="confirmPayBtn" onclick="confirmPayment()" style="display:none;"><i class="fas fa-check-circle"></i> Confirm Payment</button>
+                    </div>
+                    <div id="paymentSuccess" class="payment-success" style="display:none;">
+                        <div class="success-anim"><i class="fas fa-check-circle"></i></div>
+                        <h3>Payment Successful!</h3>
+                        <p id="paymentSummary"></p>
+                        <button class="btn-primary" onclick="resetPayment()">New Transaction</button>
+                    </div>
+                    <hr style="border-color:#2d3748; margin:20px 0;">
+                    <h4><i class="fas fa-history"></i> Recent Transactions</h4>
+                    <div class="txn-list" id="txnList"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- INCIDENT MANAGER -->
+        <section id="incidents" class="page-section">
+            <div class="incident-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Active Incidents</h3>
+                        <button class="btn-sm-accent" onclick="addIncident()"><i class="fas fa-plus"></i> New Incident</button>
+                    </div>
+                    <div id="incidentList" class="incident-list"></div>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-plus-circle"></i> Log New Incident</h3>
+                    <div class="form-row">
+                        <label>Type</label>
+                        <select class="form-input" id="incidentType">
+                            <option>Accident</option>
+                            <option>Illegal Parking</option>
+                            <option>Traffic Jam</option>
+                            <option>Road Obstruction</option>
+                            <option>Speeding Violation</option>
+                            <option>Signal Malfunction</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Location</label>
+                        <input class="form-input" id="incidentLoc" type="text" placeholder="e.g. Sector 4, Main Gate">
+                    </div>
+                    <div class="form-row">
+                        <label>Severity</label>
+                        <select class="form-input" id="incidentSev">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Description</label>
+                        <textarea class="form-input" id="incidentDesc" rows="3" placeholder="Describe the incident..."></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="submitIncident()"><i class="fas fa-flag"></i> Submit Incident</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- HEATMAP -->
+        <section id="heatmap" class="page-section">
+            <div class="card">
+                <h3><i class="fas fa-fire"></i> Traffic Density Heatmap</h3>
+                <div class="heatmap-controls">
+                    <select class="form-input" id="heatmapTime" onchange="renderHeatmap()">
+                        <option>Peak Hours (8AM–10AM)</option>
+                        <option>Afternoon (12PM–2PM)</option>
+                        <option>Evening Rush (5PM–8PM)</option>
+                        <option>Night (10PM–12AM)</option>
+                    </select>
+                    <select class="form-input" id="heatmapDay" onchange="renderHeatmap()">
+                        <option>Today</option>
+                        <option>Yesterday</option>
+                        <option>Last Week Average</option>
+                    </select>
+                </div>
+                <div class="heatmap-container" id="heatmapGrid"></div>
+                <div class="heatmap-legend">
+                    <span class="hl" style="background:#10b981">Low</span>
+                    <span class="hl" style="background:#f59e0b">Medium</span>
+                    <span class="hl" style="background:#ef4444">High</span>
+                    <span class="hl" style="background:#7c3aed">Critical</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section id="reports" class="page-section">
+            <div class="report-kpi">
+                <div class="card rk-card">
+                    <div class="rk-num" id="rk-total">4,821</div>
+                    <div class="rk-label">Vehicles This Week</div>
+                    <canvas id="sparkline1" width="200" height="50"></canvas>
+                </div>
+                <div class="card rk-card">
+                    <div class="rk-num" id="rk-park">₹42,750</div>
+                    <div class="rk-label">Parking Revenue</div>
+                    <canvas id="sparkline2" width="200" height="50"></canvas>
+                </div>
+                <div class="card rk-card">
+                    <div class="rk-num" id="rk-vio">34</div>
+                    <div class="rk-label">Total Violations</div>
+                    <canvas id="sparkline3" width="200" height="50"></canvas>
+                </div>
+            </div>
+            <div class="report-grid">
+                <div class="card report-box">
+                    <div class="report-icon"><i class="fas fa-car-side fa-2x"></i></div>
+                    <h3>Traffic History</h3>
+                    <p>Daily vehicle count, peak hours, and speed distribution.</p>
+                    <button class="btn-excel" onclick="downloadExcel('Traffic_Report')"><i class="fas fa-file-excel"></i> Download Excel</button>
+                </div>
+                <div class="card report-box">
+                    <div class="report-icon"><i class="fas fa-parking fa-2x"></i></div>
+                    <h3>Parking Logs</h3>
+                    <p>Slot turnover, duration stats, and zone utilization.</p>
+                    <button class="btn-excel" onclick="downloadExcel('Parking_Report')"><i class="fas fa-file-excel"></i> Download Excel</button>
+                </div>
+                <div class="card report-box">
+                    <div class="report-icon"><i class="fas fa-rupee-sign fa-2x"></i></div>
+                    <h3>Revenue Report</h3>
+                    <p>Daily/weekly payment collection, method breakdown.</p>
+                    <button class="btn-excel" onclick="downloadExcel('Revenue_Report')"><i class="fas fa-file-excel"></i> Download Excel</button>
+                </div>
+                <div class="card report-box">
+                    <div class="report-icon"><i class="fas fa-exclamation-triangle fa-2x"></i></div>
+                    <h3>Violation Log</h3>
+                    <p>All captured violations, timestamps, and camera IDs.</p>
+                    <button class="btn-excel" onclick="downloadExcel('Violation_Report')"><i class="fas fa-file-excel"></i> Download Excel</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="alertModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fas fa-siren-on" style="color:#ef4444;"></i></div>
+            <h3>Emergency Alert Broadcast</h3>
+            <p>Are you sure you want to broadcast an emergency alert to all zones?</p>
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button class="btn-danger" onclick="broadcastAlert()"><i class="fas fa-broadcast-tower"></i> Broadcast Now</button>
+                <button class="btn-secondary" onclick="document.getElementById('alertModal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOCATION PERMISSION POPUP -->
+    <div id="locationPermPopup" class="loc-perm-overlay" style="display:none;">
+        <div class="loc-perm-box">
+            <!-- Top icon + pulse -->
+            <div class="loc-perm-icon-wrap">
+                <div class="loc-perm-pulse-ring"></div>
+                <div class="loc-perm-pulse-ring delay"></div>
+                <div class="loc-perm-icon-circle">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+            </div>
+
+            <!-- Text -->
+            <h3 class="loc-perm-title">Allow Location Access</h3>
+            <p class="loc-perm-desc">
+                <strong>TPMS</strong> wants to access your device's GPS location to show your position on the live map and provide real-time traffic flow data.
+            </p>
+
+            <!-- What we use it for -->
+            <div class="loc-perm-features">
+                <div class="loc-perm-feat">
+                    <div class="loc-feat-icon" style="background:#00d4ff22;color:#00d4ff;"><i class="fas fa-map-marked-alt"></i></div>
+                    <div>
+                        <div class="loc-feat-title">Live Map View</div>
+                        <div class="loc-feat-desc">Show your exact position on Google Maps</div>
+                    </div>
+                </div>
+                <div class="loc-perm-feat">
+                    <div class="loc-feat-icon" style="background:#10b98122;color:#10b981;"><i class="fas fa-traffic-light"></i></div>
+                    <div>
+                        <div class="loc-feat-title">Traffic Monitoring</div>
+                        <div class="loc-feat-desc">Detect vehicles & congestion near you</div>
+                    </div>
+                </div>
+                <div class="loc-perm-feat">
+                    <div class="loc-feat-icon" style="background:#f59e0b22;color:#f59e0b;"><i class="fas fa-route"></i></div>
+                    <div>
+                        <div class="loc-feat-title">Route Suggestions</div>
+                        <div class="loc-feat-desc">Get the shortest path to your destination</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy note -->
+            <div class="loc-perm-privacy">
+                <i class="fas fa-shield-alt"></i>
+                Your location is only used within this session and is never stored or shared.
+            </div>
+
+            <!-- Action buttons -->
+            <div class="loc-perm-actions">
+                <button class="loc-btn-deny"  onclick="userDeniedLocation()">
+                    <i class="fas fa-times"></i> Don't Allow
+                </button>
+                <button class="loc-btn-allow" onclick="userAllowedLocation()">
+                    <i class="fas fa-crosshairs"></i> Allow Location Access
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPS PERMISSION / DEVICE GPS MODAL -->
+    <div id="gpsModal" class="gps-modal-overlay" style="display:none;">
+        <div class="gps-modal-box">
+            <button class="gps-modal-close" onclick="closeGpsModal()"><i class="fas fa-times"></i></button>
+            <i id="gpsModalIcon" class="fas fa-satellite-dish gps-modal-icon"></i>
+            <h3 id="gpsModalTitle" class="gps-modal-title">Enable GPS</h3>
+            <p id="gpsModalBody" class="gps-modal-body"></p>
+            <div id="gpsModalSteps" class="gps-modal-steps"></div>
+            <button id="gpsModalBtn" class="btn-primary gps-modal-action" onclick="retryGps()">
+                <i class="fas fa-redo"></i> Try Again
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
